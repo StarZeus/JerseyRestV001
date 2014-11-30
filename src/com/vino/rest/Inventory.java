@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONArray;
 
@@ -50,5 +52,22 @@ public class Inventory {
 		}
 		
 		return returnString;
+	}
+	
+	@GET
+	@Path("/brandproducts")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getProducts(@QueryParam("brand") String brand){
+		String returnString;
+		
+		if(brand != null){
+			returnString = JerseyDao.getProductsForBrand(brand);
+			
+		}else{
+			return Response.status(202).entity("Brand name missing !").build();
+		}
+			
+		return Response.ok(returnString).build();
+		
 	}
 }
