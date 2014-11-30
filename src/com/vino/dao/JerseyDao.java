@@ -48,7 +48,9 @@ public class JerseyDao {
 		JSONArray jsonArray=null;
 		try{
 			con=JerseyDao.getConnection().getConnection();
-			ps=con.prepareStatement("select * from \"PC_PARTS\" where \"PC_PARTS_MAKER\" = '" + brand + "'");
+			ps=con.prepareStatement("select * from \"PC_PARTS\" where UPPER(\"PC_PARTS_MAKER\") = ?");
+			
+			ps.setString(1, brand.toUpperCase());
 			
 			ResultSet rs=ps.executeQuery();
 			
