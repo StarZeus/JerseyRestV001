@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.owasp.esapi.ESAPI;
 
 public class ToJASON {
 	JSONObject jObject=null;
@@ -21,7 +22,13 @@ public class ToJASON {
 				
 				jObject=new JSONObject();
 				for(int i=1;i<=rsmd.getColumnCount();i++){
-					jObject.put(rsmd.getColumnName(i), resultSet.getString(i));
+//Encoding response for security (to avoid sending any possible script from DB - Starts					
+					String temp=resultSet.getString(i);
+					temp=ESAPI.encoder().canonicalize(temp);
+					temp=ESAPI.encoder().encodeForHTML(temp);
+//Encoding response for security (to avoid sending any possible script from DB - Ends					
+					
+					jObject.put(rsmd.getColumnName(i), temp);
 				}
 				jArray.put(jObject);
 			}
