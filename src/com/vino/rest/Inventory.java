@@ -1,11 +1,14 @@
 package com.vino.rest;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -13,8 +16,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 
+import com.vino.bean.PcPart;
 import com.vino.dao.JerseyDao;
 import com.vino.util.ToJASON;
 
@@ -88,6 +93,34 @@ public class Inventory {
 		}
 			
 		return Response.ok(returnString).build();
+		
+	}
+	
+	//Post method to insert data into our PC_PARTS table
+	@POST
+	@Path("/addPcPart")
+	//@Consumes(MediaType.APPLICATION_JSON) - way to decline single consume type
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.MULTIPART_FORM_DATA})
+	public Response putPCPartProducts(String inputJasonString){
+		String returnString=null;
+		int completionCode=200;
+		
+		if(inputJasonString != null){
+
+			try {
+				ObjectMapper mapper=new ObjectMapper();								// Parsing data with Jackson (JSON) parser
+				PcPart part=mapper.readValue(inputJasonString, PcPart.class);
+				completionCode = JerseyDao.insertPCParts(part.getPart_pk(), part.getPart_title(), part.getPart_code(), part.getPart_maker(), part.getPart_count(), part.getPart_desc());
+			} catch (IOException e) {
+				completionCode=500;
+			}
+			
+		}else{
+			completionCode = 500;
+		}
+			
+		if(completionCode !=200) return Response.status(completionCode).entity("An error occured while adding product").build();
+		return Response.ok("Product added successfully !").build();
 		
 	}
 }
