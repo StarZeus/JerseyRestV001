@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -58,6 +59,25 @@ public class Inventory {
 	@Path("/brandproducts")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getProducts(@QueryParam("brand") String brand){
+		String returnString;
+		
+		if(brand != null){
+			returnString = JerseyDao.getProductsForBrand(brand);
+			
+		}else{
+			return Response.status(202).entity("Brand name missing !").build();
+		}
+			
+		return Response.ok(returnString).build();
+		
+	}
+	
+	
+	//Method that does same funcationality as getProducts() as above but using PathParam
+	@GET
+	@Path("/brandproducts/{brand}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getProductsViaPath(@PathParam("brand") String brand){
 		String returnString;
 		
 		if(brand != null){
