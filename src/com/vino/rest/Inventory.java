@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.vino.bean.PcPart;
 import com.vino.dao.JerseyDao;
@@ -98,11 +99,11 @@ public class Inventory {
 	
 	//Post method to insert data into our PC_PARTS table
 	@POST
-	@Path("/addPcPart")
+	@Path("/addPcPartV1")
 	//@Consumes(MediaType.APPLICATION_JSON) - way to decline single consume type
-	@Consumes({MediaType.APPLICATION_JSON,MediaType.MULTIPART_FORM_DATA})
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
 	public Response putPCPartProducts(String inputJasonString){
-		String returnString=null;
+
 		int completionCode=200;
 		
 		if(inputJasonString != null){
@@ -112,6 +113,38 @@ public class Inventory {
 				PcPart part=mapper.readValue(inputJasonString, PcPart.class);
 				completionCode = JerseyDao.insertPCParts(part.getPart_pk(), part.getPart_title(), part.getPart_code(), part.getPart_maker(), part.getPart_count(), part.getPart_desc());
 			} catch (IOException e) {
+				completionCode=500;
+			}
+			
+		}else{
+			completionCode = 500;
+		}
+			
+		if(completionCode !=200) return Response.status(completionCode).entity("An error occured while adding product").build();
+		return Response.ok("Product added successfully !").build();
+		
+	}
+	
+	
+	//Clone of the above Post method to insert data into our PC_PARTS table, but using JasonObject to part the input message
+	@POST
+	@Path("/addPcPartV2")
+	//@Consumes(MediaType.APPLICATION_JSON) - way to decline single consume type
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
+	public Response putPCPartProductsDifferently(String inputJasonString){
+		int completionCode=200;
+		
+		if(inputJasonString != null){
+
+			try {
+				JSONObject jObject=new JSONObject(inputJasonString);								// Parsing data with Jackson (JSON) parser
+				completionCode = JerseyDao.insertPCParts(jObject.optInt("PC_PART_PK"), 
+						                                 jObject.optString("PC_PART_TITLE"),
+						                                 jObject.optInt("PC_PART_CODE"),
+						                                 jObject.optString("PC_PART_MAKER"),
+						                                 jObject.optInt("PC_PART_AVAIL"),
+						                                 jObject.optString("PC_PART_DESC"));
+			} catch (Exception e) {
 				completionCode=500;
 			}
 			
